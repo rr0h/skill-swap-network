@@ -1,0 +1,128 @@
+<nav class="bg-white shadow-lg">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center py-4">
+            <!-- Logo -->
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'dashboard:home' %}" class="text-2xl font-bold gradient-bg bg-clip-text text-transparent">
+                    <i class="fas fa-exchange-alt"></i> Skill Swap
+                </a>
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="{% url 'skills:skill_list' %}" class="text-gray-700 hover:text-purple-600 transition">
+                    <i class="fas fa-book"></i> Browse Skills
+                </a>
+                <a href="{% url 'skills:category_list' %}" class="text-gray-700 hover:text-purple-600 transition">
+                    <i class="fas fa-th-large"></i> Categories
+                </a>
+                
+                {% if user.is_authenticated %}
+                <a href="{% url 'dashboard:home' %}" class="text-gray-700 hover:text-purple-600 transition">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="{% url 'requests:request_list' %}" class="text-gray-700 hover:text-purple-600 transition">
+                    <i class="fas fa-handshake"></i> Requests
+                </a>
+                
+                <!-- Notifications -->
+                <div class="relative">
+                    <a href="{% url 'notifications:notification_list' %}" class="text-gray-700 hover:text-purple-600 transition relative">
+                        <i class="fas fa-bell fa-lg"></i>
+                        {% if unread_notifications_count > 0 %}
+                        <span id="notification-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            {{ unread_notifications_count }}
+                        </span>
+                        {% else %}
+                        <span id="notification-badge" class="hidden absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"></span>
+                        {% endif %}
+                    </a>
+                </div>
+                
+                <!-- User Menu -->
+                <div class="relative group">
+                    <button class="flex items-center space-x-2 text-gray-700 hover:text-purple-600 transition">
+                        <img src="{{ user.profile_image.url }}" alt="{{ user.username }}" class="w-8 h-8 rounded-full object-cover">
+                        <span>{{ user.username }}</span>
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    
+                    <!-- Dropdown -->
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden group-hover:block z-50">
+                        <a href="{% url 'users:profile' user.username %}" class="block px-4 py-2 text-gray-700 hover:bg-purple-50">
+                            <i class="fas fa-user"></i> My Profile
+                        </a>
+                        <a href="{% url 'users:edit_profile' %}" class="block px-4 py-2 text-gray-700 hover:bg-purple-50">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <a href="{% url 'skills:skill_create' %}" class="block px-4 py-2 text-gray-700 hover:bg-purple-50">
+                            <i class="fas fa-plus"></i> Add Skill
+                        </a>
+                        <hr class="my-2">
+                        <a href="{% url 'users:logout' %}" class="block px-4 py-2 text-red-600 hover:bg-red-50">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{% url 'users:login' %}" class="text-gray-700 hover:text-purple-600 transition">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="{% url 'users:register' %}" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition">
+                    <i class="fas fa-user-plus"></i> Sign Up
+                </a>
+                {% endif %}
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden text-gray-700">
+                <i class="fas fa-bars fa-lg"></i>
+            </button>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="hidden md:hidden pb-4">
+            <a href="{% url 'skills:skill_list' %}" class="block py-2 text-gray-700 hover:text-purple-600">
+                <i class="fas fa-book"></i> Browse Skills
+            </a>
+            <a href="{% url 'skills:category_list' %}" class="block py-2 text-gray-700 hover:text-purple-600">
+                <i class="fas fa-th-large"></i> Categories
+            </a>
+            
+            {% if user.is_authenticated %}
+            <a href="{% url 'dashboard:home' %}" class="block py-2 text-gray-700 hover:text-purple-600">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{% url 'requests:request_list' %}" class="block py-2 text-gray-700 hover:text-purple-600">
+                <i class="fas fa-handshake"></i> Requests
+            </a>
+            <a href="{% url 'notifications:notification_list' %}" class="block py-2 text-gray-700 hover:text-purple-600">
+                <i class="fas fa-bell"></i> Notifications
+                {% if unread_notifications_count > 0 %}
+                <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-2">{{ unread_notifications_count }}</span>
+                {% endif %}
+            </a>
+            <a href="{% url 'users:profile' user.username %}" class="block py-2 text-gray-700 hover:text-purple-600">
+                <i class="fas fa-user"></i> My Profile
+            </a>
+            <a href="{% url 'users:logout' %}" class="block py-2 text-red-600">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            {% else %}
+            <a href="{% url 'users:login' %}" class="block py-2 text-gray-700 hover:text-purple-600">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+            <a href="{% url 'users:register' %}" class="block py-2 text-purple-600">
+                <i class="fas fa-user-plus"></i> Sign Up
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<script>
+    // Mobile menu toggle
+    document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+        document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+</script>
