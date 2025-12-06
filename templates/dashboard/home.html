@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Skill Swap Network{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Welcome Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Welcome back, {{ user.get_full_name|default:user.username }}!</h1>
+        <p class="text-gray-600 mt-2">Here's what's happening with your skill exchanges</p>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-lg p-6 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm">Skills Offered</p>
+                    <p class="text-3xl font-bold text-purple-600 mt-2">{{ skills_offered_count }}</p>
+                </div>
+                <div class="bg-purple-100 rounded-full p-4">
+                    <i class="fas fa-chalkboard-teacher text-purple-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm">Requests Sent</p>
+                    <p class="text-3xl font-bold text-blue-600 mt-2">{{ sent_requests_count }}</p>
+                </div>
+                <div class="bg-blue-100 rounded-full p-4">
+                    <i class="fas fa-paper-plane text-blue-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm">Requests Received</p>
+                    <p class="text-3xl font-bold text-green-600 mt-2">{{ received_requests_count }}</p>
+                </div>
+                <div class="bg-green-100 rounded-full p-4">
+                    <i class="fas fa-inbox text-green-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-lg p-6 card-hover">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-600 text-sm">Average Rating</p>
+                    <p class="text-3xl font-bold text-yellow-600 mt-2">{{ average_rating }} ★</p>
+                </div>
+                <div class="bg-yellow-100 rounded-full p-4">
+                    <i class="fas fa-star text-yellow-600 text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Pending Requests -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">
+                        <i class="fas fa-clock"></i> Pending Requests
+                    </h2>
+                    <a href="{% url 'requests:request_list' %}" class="text-purple-600 hover:text-purple-700 text-sm">
+                        View All →
+                    </a>
+                </div>
+                
+                {% if pending_received %}
+                <div class="space-y-3">
+                    <h3 class="font-semibold text-gray-700 text-sm">Received</h3>
+                    {% for request in pending_received %}
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-purple-500 transition">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <img src="{{ request.sender.profile_image.url }}" alt="{{ request.sender.username }}" class="w-10 h-10 rounded-full object-cover">
+                                <div>
+                                    <p class="font-semibold text-gray-900">{{ request.sender.username }}</p>
+                                    <p class="text-sm text-gray-600">wants to learn {{ request.skill.title }}</p>
+                                </div>
+                            </div>
+                            <a href="{% url 'requests:request_detail' request.pk %}" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm transition">
+                                View
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% if pending_sent %}
+                <div class="space-y-3 mt-6">
+                    <h3 class="font-semibold text-gray-700 text-sm">Sent</h3>
+                    {% for request in pending_sent %}
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <img src="{{ request.receiver.profile_image.url }}" alt="{{ request.receiver.username }}" class="w-10 h-10 rounded-full object-cover">
+                                <div>
+                                    <p class="font-semibold text-gray-900">{{ request.receiver.username }}</p>
+                                    <p class="text-sm text-gray-600">{{ request.skill.title }}</p>
+                                </div>
+                            </div>
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Pending</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% if not pending_received and not pending_sent %}
+                <p class="text-gray-500 italic text-center py-8">No pending requests</p>
+                {% endif %}
+            </div>
+            
+            <!-- Recommended Skills -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">
+                        <i class="fas fa-lightbulb"></i> Recommended for You
+                    </h2>
+                    <a href="{% url 'skills:skill_list' %}" class="text-purple-600 hover:text-purple-700 text-sm">
+                        Browse All →
+                    </a>
+                </div>
+                
+                {% if recommended_skills %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for skill in recommended_skills %}
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-purple-500 transition card-hover">
+                        <h3 class="font-semibold text-gray-900">{{ skill.title }}</h3>
+                        <p class="text-sm text-gray-600 mt-1">by {{ skill.user.username }}</p>
+                        <div class="flex items-center justify-between mt-3">
+                            <div class="flex items-center text-sm">
+                                <span class="star-rating">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= skill.get_average_rating %}
+                                        <i class="fas fa-star"></i>
+                                        {% else %}
+                                        <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                <span class="ml-1 text-gray-600">({{ skill.get_total_reviews }})</span>
+                            </div>
+                            <a href="{% url 'skills:skill_detail' skill.pk %}" class="text-purple-600 hover:text-purple-700 text-sm">
+                                View →
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500 italic text-center py-8">No recommendations yet</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="space-y-6">
+            <!-- Profile Completion -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-user-check"></i> Profile Completion
+                </h2>
+                <div class="text-center">
+                    <div class="relative inline-flex items-center justify-center w-32 h-32">
+                        <svg class="transform -rotate-90 w-32 h-32">
+                            <circle cx="64" cy="64" r="56" stroke="#e5e7eb" stroke-width="8" fill="none" />
+                            <circle cx="64" cy="64" r="56" stroke="url(#gradient)" stroke-width="8" fill="none" 
+                                    stroke-dasharray="{{ profile_completion|floatformat:0 }} 100" 
+                                    stroke-linecap="round" />
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#667eea" />
+                                    <stop offset="100%" style="stop-color:#764ba2" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <span class="absolute text-2xl font-bold text-gray-900">{{ profile_completion }}%</span>
+                    </div>
+                    <p class="mt-4 text-gray-600">Complete your profile to get better matches</p>
+                    {% if profile_completion < 100 %}
+                    <a href="{% url 'users:edit_profile' %}" class="mt-4 inline-block px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                        Complete Profile
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Categories -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-th-large"></i> Browse Categories
+                </h2>
+                <div class="space-y-2">
+                    {% for category in categories %}
+                    <a href="{% url 'skills:category_detail' category.pk %}" class="flex items-center justify-between p-3 rounded-lg hover:bg-purple-50 transition">
+                        <div class="flex items-center">
+                            <i class="fas {{ category.icon }} text-purple-600 w-6"></i>
+                            <span class="ml-3 text-gray-900">{{ category.name }}</span>
+                        </div>
+                        <span class="text-sm text-gray-500">{{ category.skill_count }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'skills:category_list' %}" class="mt-4 block text-center text-purple-600 hover:text-purple-700 text-sm">
+                    View All Categories →
+                </a>
+            </div>
+            
+            <!-- Activity Chart -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-chart-pie"></i> Your Activity
+                </h2>
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Activity Chart
+const ctx = document.getElementById('activityChart').getContext('2d');
+new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Skills Offered', 'Requests Sent', 'Requests Received', 'Reviews'],
+        datasets: [{
+            data: [
+                {{ activity_data.skills_offered }},
+                {{ activity_data.requests_sent }},
+                {{ activity_data.requests_received }},
+                {{ activity_data.reviews }}
+            ],
+            backgroundColor: [
+                '#9333ea',
+                '#3b82f6',
+                '#10b981',
+                '#f59e0b'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
