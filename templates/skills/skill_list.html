@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Skills - Skill Swap Network{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Browse Skills</h1>
+        <p class="text-gray-600 mt-2">Discover skills you can learn from our community</p>
+    </div>
+    
+    <!-- Search and Filters -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                {{ form.query }}
+            </div>
+            <div>
+                {{ form.category }}
+            </div>
+            <div>
+                {{ form.level }}
+            </div>
+            <div>
+                <button type="submit" class="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Results Count -->
+    <div class="mb-4 flex items-center justify-between">
+        <p class="text-gray-600">Found {{ total_skills }} skill{{ total_skills|pluralize }}</p>
+        <div class="flex items-center space-x-2">
+            <label class="text-sm text-gray-600">Sort by:</label>
+            <select onchange="window.location.href='?sort=' + this.value" class="px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                <option value="-created_at">Newest</option>
+                <option value="popular">Most Popular</option>
+                <option value="rating">Highest Rated</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Skills Grid -->
+    {% if page_obj %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {% for skill in page_obj %}
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden card-hover">
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-3">
+                    <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">
+                        {{ skill.category.name|default:"Uncategorized" }}
+                    </span>
+                    <span class="text-sm text-gray-500">
+                        <i class="fas fa-eye"></i> {{ skill.views_count }}
+                    </span>
+                </div>
+                
+                <h3 class="text-xl font-bold text-gray-900 mb-2">{{ skill.title }}</h3>
+                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ skill.description|truncatewords:20 }}</p>
+                
+                <div class="flex items-center mb-4">
+                    <img src="{{ skill.user.profile_image.url }}" alt="{{ skill.user.username }}" class="w-8 h-8 rounded-full object-cover">
+                    <span class="ml-2 text-sm text-gray-700">{{ skill.user.username }}</span>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="star-rating text-sm">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= skill.get_average_rating %}
+                                <i class="fas fa-star"></i>
+                                {% else %}
+                                <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="ml-1 text-sm text-gray-600">({{ skill.get_total_reviews }})</span>
+                    </div>
+                    <a href="{% url 'skills:skill_detail' skill.pk %}" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm">
+                        View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center">
+        <nav class="flex items-center space-x-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            {% endif %}
+            
+            <span class="px-4 py-2 text-gray-700">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <i class="fas fa-chevron-right"></i>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="text-center py-12">
+        <i class="fas fa-search text-gray-400 text-6xl mb-4"></i>
+        <p class="text-gray-600 text-lg">No skills found matching your criteria</p>
+        <a href="{% url 'skills:skill_list' %}" class="mt-4 inline-block text-purple-600 hover:text-purple-700">
+            Clear filters
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
